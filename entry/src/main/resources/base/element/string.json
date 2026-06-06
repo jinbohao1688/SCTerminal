@@ -1,0 +1,36 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "permission_network_reason",
+      "value": "用于显示网络连接状态和类型信息"
+    },
+    {
+      "name": "permission_internet_reason",
+      "value": "用于访问远程服务和 Claude API"
+    },
+    {
+      "name": "permission_sensor_reason",
+      "value": "用于读取设备传感器列表"
+    },
+    {
+      "name": "permission_media_reason",
+      "value": "用于读取设备文件信息"
+    },
+    {
+      "name": "permission_bundle_reason",
+      "value": "用于查看设备已安装应用信息"
+    }
+  ]
+}

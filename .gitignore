@@ -1,0 +1,9 @@
+.preview/
+.hvigor/
+node_modules/
+build/
+*.hap
+*.app
+oh_modules/
+CLAUDE.md
+PROMPTS.md
