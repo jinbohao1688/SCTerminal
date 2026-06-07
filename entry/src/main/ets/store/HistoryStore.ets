@@ -68,6 +68,23 @@ export async function saveSshSession(session: SshSession): Promise<void> {
   await prefs.flush()
 }
 
+const KEY_REGISTRY_CACHE = 'registry_cache'
+
+export async function saveRegistryCache(data: string): Promise<void> {
+  const prefs = await getPrefs()
+  await prefs.put(KEY_REGISTRY_CACHE, data)
+  await prefs.flush()
+}
+
+export async function loadRegistryCache(): Promise<string | null> {
+  const prefs = await getPrefs()
+  const raw = await prefs.get(KEY_REGISTRY_CACHE, '') as string
+  if (raw.length === 0) {
+    return null
+  }
+  return raw
+}
+
 export async function clearSshSession(): Promise<void> {
   const prefs = await getPrefs()
   await prefs.delete(KEY_SSH_SESSION)

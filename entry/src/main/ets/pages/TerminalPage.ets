@@ -3,9 +3,12 @@ import { parse } from '../engine/CommandParser'
 import { dispatch } from '../engine/CapabilityDispatcher'
 import { terminalStore } from '../store/TerminalStore'
 import { loadHistory, saveHistory } from '../store/HistoryStore'
-import { setAppContext } from '../utils/AppContext'
+import { setAppContext, getAppContext } from '../utils/AppContext'
 import { sysInfoPlugin } from '../plugins/SysInfoPlugin'
 import { pluginRegistry } from '../plugin/PluginRegistry'
+import { loadInstalledPlugins, ThirdPartyPluginStub } from '../plugin/PluginInstaller'
+import { PluginManifest } from '../plugin/PluginSDK'
+import fs from '@ohos.file.fs'
 import { COLORS } from '../utils/color'
 import router from '@ohos.router'
 import { StatusBar } from '../components/StatusBar'
@@ -35,6 +38,22 @@ struct TerminalPage {
   async aboutToAppear(): Promise<void> {
     setAppContext(getContext())
     await pluginRegistry.install(sysInfoPlugin)
+
+    const installedIds = await loadInstalledPlugins()
+    const filesDir = getAppContext().filesDir
+    for (let i = 0; i < installedIds.length; i++) {
+      const id = installedIds[i]
+      try {
+        const installedPath = filesDir + '/sct/usr/' + id + '/installed.json'
+        const raw = fs.readTextSync(installedPath)
+        const manifest = JSON.parse(raw) as PluginManifest
+        const stub = new ThirdPartyPluginStub(manifest)
+        await pluginRegistry.install(stub)
+      } catch (_e) {
+        // Skip broken plugins
+      }
+    }
+
     this.inputHistory = await loadHistory()
     terminalStore.inputHistory = this.inputHistory
 

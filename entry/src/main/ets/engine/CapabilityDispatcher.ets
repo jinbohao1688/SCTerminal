@@ -1,6 +1,6 @@
 import { ParseResult, OutputLine, CapabilityHandler, ok, err, info, warn } from '../capabilities/types'
 import { resolve as resolvePlugin } from '../plugin/PluginRegistry'
-import { installPlugin, uninstallPlugin, fetchRegistry } from '../plugin/PluginInstaller'
+import { installPlugin, uninstallPlugin, fetchRegistry, isRegistryFromFallback } from '../plugin/PluginInstaller'
 import { pluginRegistry } from '../plugin/PluginRegistry'
 import { createContext } from '../plugin/PluginSandbox'
 import { handleDevice, COMMANDS as DEVICE_COMMANDS } from '../capabilities/deviceCapability'
@@ -44,7 +44,11 @@ async function handlePlugin(action: string, args: string[], flags: Map<string, s
     if (showAvailable) {
       try {
         const plugins = await fetchRegistry()
-        const lines: OutputLine[] = [info('--- 可用插件 ---')]
+        const lines: OutputLine[] = []
+        if (isRegistryFromFallback()) {
+          lines.push(warn('注册表获取失败，显示本地缓存（可能不是最新）'))
+        }
+        lines.push(info('--- 可用插件 ---'))
         for (let i = 0; i < plugins.length; i++) {
           const p = plugins[i]
           const installed = pluginRegistry.get(p.id) !== undefined
@@ -164,7 +168,8 @@ export async function dispatch(parsed: ParseResult): Promise<OutputLine[]> {
       const echo: OutputLine = { id: String(Date.now() + Math.random()), type: 'cmd', text: raw, timestamp: Date.now() }
       return [echo, ...(await builtin(action, args, flags))]
     } catch (e) {
-      return [err(`Built-in "${namespace}" failed: ${e}`)]
+      const msg = (e as Error).message
+      return [err('Built-in "' + namespace + '" failed: ' + msg)]
     }
   }
 
@@ -175,7 +180,8 @@ export async function dispatch(parsed: ParseResult): Promise<OutputLine[]> {
       const echo: OutputLine = { id: String(Date.now() + Math.random()), type: 'cmd', text: raw, timestamp: Date.now() }
       return [echo, ...(await handler(action, args, flags))]
     } catch (e) {
-      return [err(`Handler "${namespace}" failed: ${e}`)]
+      const msg = (e as Error).message
+      return [err('Handler "' + namespace + '" failed: ' + msg)]
     }
   }
 

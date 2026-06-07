@@ -1,7 +1,5 @@
 import { PluginManifest } from './PluginSDK'
 
-const REQUIRED = ['id', 'name', 'version', 'author', 'description', 'permissions', 'minSCTVersion']
-
 export function parseManifest(json: string): PluginManifest {
   const obj = JSON.parse(json) as PluginManifest
 
@@ -9,11 +7,27 @@ export function parseManifest(json: string): PluginManifest {
     throw new Error('Invalid plugin.json: must be a JSON object.')
   }
 
-  for (let i = 0; i < REQUIRED.length; i++) {
-    const value = obj[REQUIRED[i]]
-    if (value === undefined) {
-      throw new Error('Invalid plugin.json: missing required field "' + REQUIRED[i] + '".')
-    }
+  // Explicit field checks instead of dynamic index access (obj[key] unsupported in ArkTS)
+  if (obj.id === undefined) {
+    throw new Error('Invalid plugin.json: missing required field "id".')
+  }
+  if (obj.name === undefined) {
+    throw new Error('Invalid plugin.json: missing required field "name".')
+  }
+  if (obj.version === undefined) {
+    throw new Error('Invalid plugin.json: missing required field "version".')
+  }
+  if (obj.author === undefined) {
+    throw new Error('Invalid plugin.json: missing required field "author".')
+  }
+  if (obj.description === undefined) {
+    throw new Error('Invalid plugin.json: missing required field "description".')
+  }
+  if (obj.permissions === undefined) {
+    throw new Error('Invalid plugin.json: missing required field "permissions".')
+  }
+  if (obj.minSCTVersion === undefined) {
+    throw new Error('Invalid plugin.json: missing required field "minSCTVersion".')
   }
 
   if (typeof obj.id !== 'string' || obj.id.length === 0) {
