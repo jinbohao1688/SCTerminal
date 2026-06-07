@@ -7,7 +7,10 @@
 ![Platform](https://img.shields.io/badge/Platform-HarmonyOS%20NEXT-blue)
 ![API](https://img.shields.io/badge/API-12%2B-green)
 ![Language](https://img.shields.io/badge/Language-ArkTS-orange)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
+![Status](https://img.shields.io/badge/Status-Early%20Preview-yellow)
+
+> ⚠️ **当前状态：早期预览版（v0.4.0）**
+> 部分功能仍在开发或待真机验证，详见下方功能状态表。
 
 ---
 
@@ -15,51 +18,78 @@
 
 SCTerminal 是一个运行在 HarmonyOS NEXT 上的原生开发者工具，提供 CLI 风格的系统能力交互界面。
 
-它不是 Linux runtime，不是 Termux，不是 OS shell 模拟器。
+**它不是 Linux runtime，不是 Termux，不是 OS shell 模拟器。**
 
 它是一个**开发者能力中枢**：
-
 - 用命令行方式查询和控制鸿蒙系统能力
-- 通过 SSH 把手机变成远程 Linux 控制台
+- 通过 SSH 把手机变成远程 Linux 控制台（开发中）
 - 通过插件系统让社区无限扩展
 
 ---
 
-## 功能概览
+## 功能状态
 
-### 本地系统能力
+| 功能 | 状态 | 说明 |
+|------|------|------|
+| 命令引擎 | ✅ 可用 | Parser + Dispatcher 完整 |
+| device / battery / net | ✅ 可用 | 需真机，预览器数据为空 |
+| sensor list | ✅ 可用 | 需真机 |
+| hmos bundle / perf / inspect | ✅ 可用 | 需真机，部分权限受限 |
+| plugin install / list | ✅ 可用 | GitHub 注册表，国内可能超时 |
+| 插件系统 SDK | ✅ 可用 | 第三方插件开发文档已发布 |
+| http get / post | ✅ 可用 | |
+| fs ls / cat / write / mkdir | ⚠️ 开发完成，待真机验证 | 预览器文件系统有限制 |
+| fs cd | ⚠️ 开发完成，待真机验证 | 预览器无法正确读取目录 |
+| SSH 远程控制 | 🚧 开发完成，未测试 | 需自行部署 WebSSH 网关 |
+| 截图（hmos screenshot）| ❌ 暂不可用 | API 版本变更 |
+| sct 包管理 | 🔮 规划中 | 依赖 NDK 层 |
+| Python / Lua 运行时 | 🔮 规划中 | 依赖 NDK 层 |
+
+---
+
+## 命令速查
+
+### 系统信息
 
 ```
 device info          # 设备型号 / OS 版本 / UDID
 device model         # 设备型号
-device os            # OS 详细版本
-
-battery status       # 电量 / 充电状态 / 温度 / 健康状态
-
-net status           # 网络连接状态 / 类型
+device os            # OS 版本详情
+battery status       # 电量 / 充电状态 / 温度
+net status           # 网络连接状态
 net info             # 网络详细信息
-
-sensor list          # 列出所有传感器
-
-file list            # 沙箱文件列表
-file stat <name>     # 文件详细信息
-file read <name>     # 读取文件内容
+sensor list          # 传感器列表
 ```
 
-### 鸿蒙开发者专属命令（hmos）
+### 鸿蒙开发者专属（hmos）
 
 ```
-hmos bundle list              # 列出已安装应用
+hmos bundle list              # 已安装应用列表
 hmos bundle info <bundleName> # 应用详细信息
-hmos perf cpu                 # CPU 性能信息
-hmos perf mem                 # 内存使用情况
-hmos log [--filter=tag]       # 日志工具
-hmos screenshot               # 截图
-hmos inspect <bundleName>     # 检查应用权限和签名
+hmos perf cpu                 # CPU 占用
+hmos perf mem                 # 内存使用
+hmos inspect <bundleName>     # 应用权限和签名
 hmos device                   # 设备综合状态
+hmos log [--filter=tag]       # 日志工具
 ```
 
-### SSH 远程控制
+### 文件系统（⚠️ 待真机验证）
+
+```
+fs pwd               # 显示当前路径
+fs ls [path]         # 列出目录内容
+fs cd <dir>          # 切换目录
+fs cat <file>        # 读取文件
+fs write <file> <content>  # 写入文件
+fs mkdir <dir>       # 创建目录
+fs rm <file>         # 删除文件
+fs stat <path>       # 文件信息
+fs cp <src> <dst>    # 复制文件
+```
+
+所有文件操作在应用沙箱内（~/sct/home），不能访问系统目录。
+
+### SSH 远程控制（🚧 未测试）
 
 ```
 ssh gateway --url=http://your-server:8080   # 配置 WebSSH 网关
@@ -69,17 +99,29 @@ ssh status                                   # 查看连接状态
 ssh disconnect                               # 断开连接
 ```
 
+> SSH 功能需要自行部署 WebSSH 网关，见下方说明。
+> 功能代码已完成，尚未在真实环境测试。
+
 ### HTTP 工具
 
 ```
-http get <url>                    # GET 请求
-http post <url> <body>            # POST 请求（支持 --header=K:V）
+http get <url>
+http post <url> <body> [--header=K:V]
+```
+
+### 插件管理
+
+```
+plugin install <id>        # 从插件市场安装
+plugin list                # 已安装插件
+plugin list --available    # 可用插件
+plugin remove <id>         # 卸载插件
 ```
 
 ### 内置命令
 
 ```
-help       # 显示所有命令
+help       # 所有命令
 clear      # 清空输出
 history    # 命令历史
 ```
@@ -88,112 +130,69 @@ history    # 命令历史
 
 ## 插件系统
 
-SCTerminal 支持第三方插件扩展。任何开发者都可以编写插件，添加新的命令组。
+SCTerminal 支持第三方插件扩展，插件市场基于 GitHub 托管，完全免费。
 
 ### 安装插件
 
 ```
-plugin install com.author.pluginname   # 从插件市场
-plugin install https://github.com/...  # 从 URL
-plugin list                            # 查看已安装插件
-plugin remove com.author.pluginname    # 卸载插件
+plugin install com.sct.sysinfo
 ```
 
 ### 开发插件
 
-实现 `SCTerminalPlugin` 接口：
+参考 [plugin-sdk/README.md](./plugin-sdk/README.md)
 
-```typescript
-import { SCTerminalPlugin, PluginManifest, PluginCommand, PluginContext } from './plugin/PluginSDK'
-import { OutputLine } from './capabilities/types'
-
-export class MyPlugin implements SCTerminalPlugin {
-  manifest: PluginManifest = {
-    id: 'com.yourname.myplugin',
-    name: 'My Plugin',
-    version: '1.0.0',
-    author: 'Your Name',
-    description: '插件描述',
-    permissions: [],
-    minSCTVersion: '1.0.0'
-  }
-
-  commands: PluginCommand[] = [
-    {
-      namespace: 'myplugin',
-      action: 'hello',
-      description: '打个招呼',
-      usage: 'myplugin hello'
-    }
-  ]
-
-  async execute(
-    action: string,
-    args: string[],
-    flags: Map<string, string>,
-    ctx: PluginContext
-  ): Promise<OutputLine[]> {
-    if (action === 'hello') {
-      ctx.println('Hello from MyPlugin!', 'success')
-    }
-    return []
-  }
-}
-```
-
-插件可以使用的沙箱 API（通过 `PluginContext`）：
-
-| API | 说明 |
-|-----|------|
-| `ctx.println(text, type)` | 输出到终端 |
-| `ctx.readFile(path)` | 读取沙箱文件 |
-| `ctx.writeFile(path, content)` | 写入沙箱文件 |
-| `ctx.fetch(url)` | HTTPS 请求 |
-| `ctx.requestPermission(perms)` | 申请权限 |
-| `ctx.storage.get/set/delete` | 插件独立 KV 存储 |
+实现 `SCTerminalPlugin` 接口，提交 PR 到本仓库即可上架。
 
 ---
 
-## 项目结构
+## SSH 网关部署
 
+SSH 功能不能直接 SSH，需要中间网关：
+
+```bash
+mkdir sct-gateway && cd sct-gateway
+npm init -y
+npm install express ssh2
+
+# 创建 gateway.js
+cat > gateway.js << 'GATEWAY'
+const express = require('express')
+const { Client } = require('ssh2')
+const app = express()
+app.use(express.json())
+
+app.post('/exec', (req, res) => {
+  const { host, user, port, command, password } = req.body
+  const conn = new Client()
+  conn.on('ready', () => {
+    conn.exec(command, (err, stream) => {
+      if (err) { res.json({ output: err.message, exitCode: 1 }); return }
+      let output = ''
+      stream.on('data', d => output += d.toString())
+      stream.stderr.on('data', d => output += d.toString())
+      stream.on('close', code => {
+        res.json({ output, exitCode: code })
+        conn.end()
+      })
+    })
+  }).on('error', e => {
+    res.json({ output: e.message, exitCode: 1 })
+  }).connect({ host, port: port || 22, username: user, password })
+})
+
+app.get('/ping', (req, res) => res.json({ status: 'ok' }))
+app.listen(8080, '0.0.0.0', () => console.log('Gateway on :8080'))
+GATEWAY
+
+node gateway.js
 ```
-entry/src/main/ets/
-├── pages/              # 页面
-│   ├── TerminalPage.ets
-│   └── PluginManagerPage.ets
-├── components/         # UI 组件
-│   ├── TerminalView.ets
-│   ├── CommandInput.ets
-│   ├── StatusBar.ets
-│   └── TabBar.ets
-├── engine/             # 命令引擎
-│   ├── CommandParser.ets
-│   └── CapabilityDispatcher.ets
-├── capabilities/       # 本地系统能力
-│   ├── types.ets
-│   ├── deviceCapability.ets
-│   ├── batteryCapability.ets
-│   ├── networkCapability.ets
-│   ├── sensorCapability.ets
-│   ├── fileCapability.ets
-│   └── HmosCapability.ets
-├── remote/             # 远程能力
-│   ├── SshCapability.ets
-│   └── HttpCapability.ets
-├── plugin/             # 插件系统
-│   ├── PluginSDK.ets
-│   ├── PluginRegistry.ets
-│   ├── PluginSandbox.ets
-│   └── PluginManifest.ets
-├── plugins/            # 内置插件
-│   └── SysInfoPlugin.ets
-├── store/              # 状态管理
-│   ├── TerminalStore.ets
-│   └── HistoryStore.ets
-└── utils/
-    ├── color.ets
-    ├── permission.ets
-    └── time.ets
+
+然后在 SCTerminal：
+```
+ssh gateway --url=http://你的IP:8080
+ssh connect 目标主机 --user=root
+ssh exec ls -la
 ```
 
 ---
@@ -202,73 +201,44 @@ entry/src/main/ets/
 
 - DevEco Studio 5.0+
 - HarmonyOS NEXT SDK API 12+
-- 真机或 API 12 模拟器
+- 真机或 API 12 模拟器（预览器功能受限）
 
 ---
 
 ## 开发环境搭建
 
 ```bash
-# 1. 克隆仓库
 git clone https://github.com/jinbohao1688/SCTerminal.git
-
-# 2. 用 DevEco Studio 打开项目
-
-# 3. 等待依赖同步完成
-
-# 4. Build → Build Hap(s) 编译
-
-# 5. 连接设备，Run 运行
-```
-
----
-
-## SSH 网关配置
-
-SSH 功能需要你自己部署一个 WebSSH 网关。
-
-```bash
-# 在你的 Linux 服务器上
-mkdir sct-gateway && cd sct-gateway
-npm init -y
-npm install express ssh2
-
-# 创建 gateway.js（见 docs/gateway.js）
-node gateway.js
-```
-
-然后在 SCTerminal 里：
-
-```
-ssh gateway --url=http://your-server-ip:8080
-ssh connect target-host --user=root --port=22
-ssh exec ls -la
+# 用 DevEco Studio 打开
+# Build → Build Hap(s)
+# 连接真机 Run
 ```
 
 ---
 
 ## 路线图
 
-- [x] 命令引擎（Parser + Dispatcher）
-- [x] 本地系统能力（device / battery / net / sensor / file）
-- [x] 鸿蒙开发者命令组（hmos）
-- [x] SSH 远程控制
+- [x] 命令引擎
+- [x] 本地系统能力
+- [x] hmos 开发者命令组
+- [x] 插件系统（SDK + 市场）
+- [x] 插件 SDK 文档
 - [x] HTTP 工具
-- [x] 插件系统（SDK + Registry + Sandbox）
-- [x] 插件管理 UI
-- [ ] 插件市场（在线安装）
-- [ ] NDK 运行时（Python / Lua / QuickJS）
+- [x] SSH 架构（待测试）
+- [x] 文件系统命令（待真机验证）
+- [ ] 真机完整测试
+- [ ] SSH 端到端验证
+- [ ] NDK 运行时（Python / Lua）
 - [ ] sct 包管理
-- [ ] 多会话 Tab 完整支持
-- [ ] 插件 SDK 文档站
+- [ ] 插件市场 Web 页面
 
 ---
 
 ## 贡献
 
-欢迎提交插件、报告 bug、提出功能建议。
-
-插件开发参考 `entry/src/main/ets/plugins/SysInfoPlugin.ets`。
+- 写插件：参考 [plugin-sdk/README.md](./plugin-sdk/README.md)
+- 报 bug：提 Issue
+- 提 PR：欢迎
 
 ---
 
