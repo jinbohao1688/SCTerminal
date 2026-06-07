@@ -17,7 +17,7 @@
       "version": "1.0.0",
       "author": "community",
       "description": "API 接口测试工具",
-      "downloadUrl": "",
+      "downloadUrl": "https://raw.githubusercontent.com/jinbohao1688/SCTerminal/main/plugin-registry/packages/httptest.json",
       "bundled": false
     }
   ]

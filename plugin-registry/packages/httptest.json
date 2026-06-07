@@ -1,0 +1,12 @@
+{
+  "manifest": {
+    "id": "com.sct.httptest",
+    "name": "HTTP Tester",
+    "version": "1.0.0",
+    "author": "community",
+    "description": "API 接口测试工具",
+    "permissions": [],
+    "minSCTVersion": "1.0.0"
+  },
+  "code": ""
+}
