@@ -6,4 +6,5 @@ build/
 *.app
 oh_modules/
 CLAUDE.md
+HANDOVER.md
 PROMPTS.md
