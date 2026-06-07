@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-06-07",
+  "plugins": [
+    {
+      "id": "com.sct.sysinfo",
+      "name": "SysInfo Plugin",
+      "version": "1.0.0",
+      "author": "SCTerminal",
+      "description": "系统信息增强插件",
+      "downloadUrl": "",
+      "bundled": true
+    },
+    {
+      "id": "com.sct.httptest",
+      "name": "HTTP Tester",
+      "version": "1.0.0",
+      "author": "community",
+      "description": "API 接口测试工具",
+      "downloadUrl": "",
+      "bundled": false
+    }
+  ]
+}

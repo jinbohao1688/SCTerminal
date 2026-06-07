@@ -1,5 +1,7 @@
 import { ParseResult, OutputLine, CapabilityHandler, ok, err, info, warn } from '../capabilities/types'
 import { resolve as resolvePlugin } from '../plugin/PluginRegistry'
+import { installPlugin, uninstallPlugin, fetchRegistry } from '../plugin/PluginInstaller'
+import { pluginRegistry } from '../plugin/PluginRegistry'
 import { createContext } from '../plugin/PluginSandbox'
 import { handleDevice, COMMANDS as DEVICE_COMMANDS } from '../capabilities/deviceCapability'
 import { handleBattery, COMMANDS as BATTERY_COMMANDS } from '../capabilities/batteryCapability'
@@ -19,6 +21,59 @@ handlers.set('file',    handleFile)
 handlers.set('hmos',    handleHmos)
 handlers.set('ssh',     handleSsh)
 handlers.set('http',    handleHttp)
+
+async function handlePlugin(action: string, args: string[], flags: Map<string, string>): Promise<OutputLine[]> {
+  if (action === 'install') {
+    if (args.length === 0) {
+      return [err('Usage: plugin install <id>')]
+    }
+    return installPlugin(args[0])
+  }
+
+  if (action === 'remove') {
+    if (args.length === 0) {
+      return [err('Usage: plugin remove <id>')]
+    }
+    return uninstallPlugin(args[0])
+  }
+
+  if (action === 'list') {
+    const showAvailable = flags.get('available') === 'true'
+    if (showAvailable) {
+      try {
+        const plugins = await fetchRegistry()
+        const lines: OutputLine[] = [info('--- 可用插件 ---')]
+        for (let i = 0; i < plugins.length; i++) {
+          const p = plugins[i]
+          const installed = pluginRegistry.get(p.id) !== undefined
+          const tag = installed ? ' [已安装]' : ''
+          lines.push(ok(p.name + ' v' + p.version + ' (' + p.id + ')' + tag))
+          lines.push(info('  ' + p.description + ' — ' + p.author))
+        }
+        return lines
+      } catch (e) {
+        const msg = (e as Error).message
+        return [err('获取注册表失败: ' + msg)]
+      }
+    }
+
+    const installed = pluginRegistry.list()
+    if (installed.length === 0) {
+      return [info('没有已安装的插件。运行 plugin list --available 查看可用插件')]
+    }
+    const lines: OutputLine[] = [info('--- 已安装插件 ---')]
+    for (let i = 0; i < installed.length; i++) {
+      const m = installed[i]
+      lines.push(ok(m.name + ' v' + m.version + ' (' + m.id + ')'))
+      lines.push(info('  ' + m.description + ' — ' + m.author))
+    }
+    return lines
+  }
+
+  return [warn('Unknown action: ' + action + '. Supported: install | remove | list')]
+}
+
+handlers.set('plugin',  handlePlugin)
 
 function buildHelp(): OutputLine[] {
   const lines: OutputLine[] = []
