@@ -11,7 +11,7 @@ export class TerminalStore {
   @Trace inputHistory: string[] = []
   @Trace currentInput: string = ''
   @Trace isProcessing: boolean = false
-  @Trace currentPath: string = '~/sct/home'
+  @Trace currentPath: string = '~'
 
   appendLines(newLines: OutputLine[]): void {
     this.lines = [...this.lines, ...newLines]

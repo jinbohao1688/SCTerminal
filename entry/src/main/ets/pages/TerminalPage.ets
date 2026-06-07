@@ -15,6 +15,7 @@ import { StatusBar } from '../components/StatusBar'
 import { TabBar } from '../components/TabBar'
 import { TerminalView } from '../components/TerminalView'
 import { CommandInput } from '../components/CommandInput'
+import { initSctDirectories } from '../capabilities/FsCapability'
 
 @Entry
 @Component
@@ -27,6 +28,7 @@ struct TerminalPage {
 
   async aboutToAppear(): Promise<void> {
     setAppContext(getContext())
+    await initSctDirectories()
     await pluginRegistry.install(sysInfoPlugin)
 
     const installedIds = await loadInstalledPlugins()

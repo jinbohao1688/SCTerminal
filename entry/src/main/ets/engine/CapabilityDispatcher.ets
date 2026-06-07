@@ -200,6 +200,18 @@ export async function dispatch(parsed: ParseResult): Promise<OutputLine[]> {
     }
   }
 
-  // 4) Unknown command
+  // 4) cd shortcut: cd <dir> → fs cd <dir>
+  if (parsed.namespace === 'cd') {
+    const fsArgs = parsed.action === 'help' ? [] : [parsed.action].concat(parsed.args)
+    try {
+      const echo: OutputLine = { id: String(Date.now() + Math.random()), type: 'cmd', text: raw, timestamp: Date.now() }
+      return [echo, ...(await handleFs('cd', fsArgs, parsed.flags))]
+    } catch (e) {
+      const msg = (e as Error).message
+      return [err('cd failed: ' + msg)]
+    }
+  }
+
+  // 5) Unknown command
   return [err(`Unknown command: ${namespace}. Type "help" to see available commands.`)]
 }

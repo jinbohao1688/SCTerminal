@@ -1,4 +1,4 @@
-import { CapabilityHandler, ok, err, warn } from './types'
+import { CapabilityHandler, OutputLine, ok, err, warn, info } from './types'
 import fs from '@ohos.file.fs'
 import { getAppContext } from '../utils/AppContext'
 import { terminalStore } from '../store/TerminalStore'
@@ -30,6 +30,33 @@ function getHomeDir(): string {
   return getFilesDir() + '/sct/home'
 }
 
+export async function initSctDirectories(): Promise<void> {
+  const filesDir = getFilesDir()
+  console.log('filesDir: ' + filesDir)
+  const dirs = [
+    filesDir + '/sct',
+    filesDir + '/sct/bin',
+    filesDir + '/sct/usr',
+    filesDir + '/sct/home',
+    filesDir + '/sct/tmp',
+    filesDir + '/sct/cache'
+  ]
+  for (let i = 0; i < dirs.length; i++) {
+    try {
+      fs.mkdirSync(dirs[i])
+      console.log('created dir: ' + dirs[i])
+    } catch (e) {
+      try {
+        const s = fs.statSync(dirs[i])
+        console.log('dir exists: ' + dirs[i] + ' isDirectory=' + s.isDirectory())
+      } catch (_e2) {
+        console.log('dir FAILED: ' + dirs[i] + ' error=' + (e as Error).message)
+      }
+    }
+  }
+  console.log('initSctDirectories done, homeDir=' + getHomeDir())
+}
+
 function normalizePathComponents(input: string): string {
   const parts: string[] = []
   const segments = input.split('/')
@@ -53,24 +80,16 @@ function normalizePathComponents(input: string): string {
   return result
 }
 
-function currentDir(): string {
-  const cwd = terminalStore.currentPath
-  if (cwd.length > 0 && cwd[0] === '~') {
-    return getHomeDir() + cwd.slice(1)
-  }
-  if (cwd.length > 0 && cwd[0] === '/') {
-    return getFilesDir() + cwd
-  }
-  return getHomeDir()
-}
-
 function resolvePath(userPath: string): string {
   const filesDir = getFilesDir()
+  const homeDir = getHomeDir()
   let fullPath: string
-  if (userPath.length > 0 && userPath[0] === '/') {
+  if (userPath.length === 0) {
+    fullPath = homeDir
+  } else if (userPath[0] === '/') {
     fullPath = filesDir + userPath
   } else {
-    fullPath = currentDir() + '/' + userPath
+    fullPath = homeDir + '/' + userPath
   }
   const normalized = normalizePathComponents(fullPath)
   const normalizedFilesDir = normalizePathComponents(filesDir)
@@ -234,7 +253,7 @@ export const handleFs: CapabilityHandler = async (action, args, _flags) => {
           displayPath = '/'
         }
         terminalStore.setPath(displayPath)
-        return [ok('')]
+        return [ok(terminalStore.currentPath)]
       } catch (e) {
         const msg = (e as Error).message
         return [err('cd failed: ' + msg)]
