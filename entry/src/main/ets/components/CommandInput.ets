@@ -1,5 +1,5 @@
-import { COLORS } from '../utils/color'
 import { KeyCode } from '@kit.InputKit'
+import { terminalStore } from '../store/TerminalStore'
 
 @Component
 export struct CommandInput {
@@ -44,48 +44,37 @@ export struct CommandInput {
     Column() {
       Divider()
         .height(1)
-        .color(COLORS.BORDER)
+        .color('#2A2A2A')
       Row() {
-        Text('➜ ~')
-          .fontSize(14)
-          .fontColor(COLORS.SUCCESS)
+        Text(terminalStore.currentPath + '❯')
+          .fontSize(12)
+          .fontColor('#CCCCCC')
           .fontFamily('monospace')
-          .margin({ right: 8 })
+          .constraintSize({ maxWidth: 200 })
 
         Button('↑')
-          .fontSize(16)
-          .fontColor('#555555')
+          .fontSize(14)
+          .fontColor('#444444')
           .backgroundColor(Color.Transparent)
-          .width(32)
-          .height(32)
+          .width(28)
+          .height(28)
           .padding(0)
           .onClick(() => { this.navigateUp() })
 
         Button('↓')
-          .fontSize(16)
-          .fontColor('#555555')
+          .fontSize(14)
+          .fontColor('#444444')
           .backgroundColor(Color.Transparent)
-          .width(32)
-          .height(32)
+          .width(28)
+          .height(28)
           .padding(0)
-          .margin({ right: 4 })
           .onClick(() => { this.navigateDown() })
 
-        Button('↵')
-          .fontSize(16)
-          .fontColor('#555555')
-          .backgroundColor(Color.Transparent)
-          .width(32)
-          .height(32)
-          .padding(0)
-          .margin({ right: 4 })
-          .onClick(() => { this.submitCmd() })
-
-        TextInput({ text: this.currentInput, placeholder: '输入命令…' })
+        TextInput({ text: this.currentInput, placeholder: '输入命令...' })
           .fontSize(13)
           .fontFamily('monospace')
-          .fontColor(COLORS.INFO)
-          .placeholderColor(COLORS.CMD)
+          .fontColor('#9CDCFE')
+          .placeholderColor('#333333')
           .backgroundColor(Color.Transparent)
           .layoutWeight(1)
           .onChange((value: string) => {
@@ -101,11 +90,21 @@ export struct CommandInput {
               this.navigateDown()
             }
           })
+
+        Button('↵')
+          .fontSize(18)
+          .fontColor('#4EC9B0')
+          .backgroundColor(Color.Transparent)
+          .width(36)
+          .height(28)
+          .padding(0)
+          .onClick(() => { this.submitCmd() })
       }
       .width('100%')
-      .padding({ left: 12, right: 12, top: 8, bottom: 8 })
+      .height(52)
+      .padding({ left: 12, right: 8 })
     }
     .width('100%')
-    .backgroundColor(COLORS.INPUT_BG)
+    .backgroundColor('#1A1A1A')
   }
 }

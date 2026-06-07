@@ -1,5 +1,3 @@
-import { COLORS } from '../utils/color'
-
 @Component
 export struct TabBar {
   @Prop sessions: string[]
@@ -11,36 +9,42 @@ export struct TabBar {
     Scroll() {
       Row() {
         ForEach(this.sessions, (id: string) => {
-          Text(id)
-            .fontSize(12)
-            .fontFamily('monospace')
-            .fontColor(id === this.activeSession ? COLORS.INFO : COLORS.CMD)
-            .padding({ left: 10, right: 10, top: 6, bottom: 6 })
-            .backgroundColor(id === this.activeSession ? '#1A2A3A' : Color.Transparent)
-            .borderRadius(4)
-            .margin({ right: 4 })
-            .onClick(() => {
-              if (this.onSwitch !== undefined) {
-                this.onSwitch(id)
-              }
-            })
-            .gesture(
-              LongPressGesture()
-                .onAction(() => {
-                  if (this.sessions.length <= 1) return
-                  if (this.onClose !== undefined) {
-                    this.onClose(id)
-                  }
-                })
-            )
+          Column() {
+            Text(id)
+              .fontSize(12)
+              .fontFamily('monospace')
+              .fontColor(id === this.activeSession ? '#4EC9B0' : '#444444')
+              .padding({ left: 8, right: 8, top: 6, bottom: 2 })
+              .onClick(() => {
+                if (this.onSwitch !== undefined) {
+                  this.onSwitch(id)
+                }
+              })
+              .gesture(
+                LongPressGesture()
+                  .onAction(() => {
+                    if (this.sessions.length <= 1) return
+                    if (this.onClose !== undefined) {
+                      this.onClose(id)
+                    }
+                  })
+              )
+            if (id === this.activeSession) {
+              Divider()
+                .height(2)
+                .width(32)
+                .color('#4EC9B0')
+            }
+          }
+          .margin({ right: 24 })
         })
       }
-      .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+      .padding({ left: 12, right: 12, top: 4, bottom: 0 })
     }
     .scrollable(ScrollDirection.Horizontal)
     .width('100%')
     .height(32)
-    .backgroundColor(COLORS.BG)
+    .backgroundColor('#0D0D0D')
     .scrollBar(BarState.Off)
   }
 }

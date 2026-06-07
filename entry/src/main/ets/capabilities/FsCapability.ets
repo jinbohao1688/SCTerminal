@@ -1,6 +1,7 @@
 import { CapabilityHandler, ok, err, warn } from './types'
 import fs from '@ohos.file.fs'
 import { getAppContext } from '../utils/AppContext'
+import { terminalStore } from '../store/TerminalStore'
 
 const MAX_CAT = 20 * 1024
 
@@ -17,7 +18,8 @@ export const COMMANDS: FsCommand[] = [
   { action: 'mkdir', description: 'fs mkdir <dir> — 创建目录' },
   { action: 'stat',  description: 'fs stat <path> — 文件/目录信息' },
   { action: 'cp',    description: 'fs cp <src> <dst> — 复制文件' },
-  { action: 'pwd',   description: 'fs pwd — 显示当前沙箱根路径' },
+  { action: 'pwd',   description: 'fs pwd — 显示当前工作目录' },
+  { action: 'cd',    description: 'fs cd [dir] — 切换当前目录' },
 ]
 
 function getFilesDir(): string {
@@ -51,13 +53,24 @@ function normalizePathComponents(input: string): string {
   return result
 }
 
+function currentDir(): string {
+  const cwd = terminalStore.currentPath
+  if (cwd.length > 0 && cwd[0] === '~') {
+    return getHomeDir() + cwd.slice(1)
+  }
+  if (cwd.length > 0 && cwd[0] === '/') {
+    return getFilesDir() + cwd
+  }
+  return getHomeDir()
+}
+
 function resolvePath(userPath: string): string {
   const filesDir = getFilesDir()
   let fullPath: string
   if (userPath.length > 0 && userPath[0] === '/') {
     fullPath = filesDir + userPath
   } else {
-    fullPath = getHomeDir() + '/' + userPath
+    fullPath = currentDir() + '/' + userPath
   }
   const normalized = normalizePathComponents(fullPath)
   const normalizedFilesDir = normalizePathComponents(filesDir)
@@ -192,10 +205,43 @@ export const handleFs: CapabilityHandler = async (action, args, _flags) => {
     }
 
     case 'pwd': {
-      return [ok(getHomeDir())]
+      return [ok(terminalStore.currentPath)]
+    }
+
+    case 'cd': {
+      try {
+        const homeDir = getHomeDir()
+        let targetPath: string
+        if (args.length === 0) {
+          targetPath = homeDir
+        } else {
+          targetPath = resolvePath(args[0])
+        }
+        const s = fs.statSync(targetPath)
+        if (!s.isDirectory()) {
+          return [err('cd failed: ' + args[0] + ' is not a directory')]
+        }
+        const filesDir = getFilesDir()
+        let displayPath: string
+        if (targetPath.indexOf(homeDir) === 0) {
+          displayPath = '~' + targetPath.slice(homeDir.length)
+        } else if (targetPath.indexOf(filesDir) === 0) {
+          displayPath = targetPath.slice(filesDir.length)
+        } else {
+          displayPath = targetPath
+        }
+        if (displayPath.length === 0) {
+          displayPath = '/'
+        }
+        terminalStore.setPath(displayPath)
+        return [ok('')]
+      } catch (e) {
+        const msg = (e as Error).message
+        return [err('cd failed: ' + msg)]
+      }
     }
 
     default:
-      return [warn('Unknown action: ' + action + '. Supported: ls | cat | write | rm | mkdir | stat | cp | pwd')]
+      return [warn('Unknown action: ' + action + '. Supported: ls | cat | write | rm | mkdir | stat | cp | pwd | cd')]
   }
 }

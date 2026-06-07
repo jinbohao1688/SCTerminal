@@ -11,6 +11,7 @@ export class TerminalStore {
   @Trace inputHistory: string[] = []
   @Trace currentInput: string = ''
   @Trace isProcessing: boolean = false
+  @Trace currentPath: string = '~/sct/home'
 
   appendLines(newLines: OutputLine[]): void {
     this.lines = [...this.lines, ...newLines]
@@ -31,6 +32,10 @@ export class TerminalStore {
 
   clearLines(): void {
     this.lines = []
+  }
+
+  setPath(path: string): void {
+    this.currentPath = path
   }
 }
 

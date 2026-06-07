@@ -16,16 +16,6 @@ import { TabBar } from '../components/TabBar'
 import { TerminalView } from '../components/TerminalView'
 import { CommandInput } from '../components/CommandInput'
 
-const WELCOME: OutputLine[] = [
-  info('  SCTerminal v1.0'),
-  info('  HarmonyOS Developer Command Hub'),
-  info('──────────────────────────────'),
-  info('  输入 help 查看所有命令'),
-  info('  输入 plugin install 安装插件'),
-  info('  输入 ssh connect 连接远程服务器'),
-  info(''),
-]
-
 @Entry
 @Component
 struct TerminalPage {
@@ -57,7 +47,7 @@ struct TerminalPage {
     this.inputHistory = await loadHistory()
     terminalStore.inputHistory = this.inputHistory
 
-    this.lines = [...WELCOME]
+    this.lines = [info('  SCTerminal v1.0'), info('  HarmonyOS Developer Command Hub'), info('  ──────────────────────────────'), info(''), info('  help          查看所有命令'), info('  plugin install <id>   安装插件'), info('  ssh connect <host>    连接远程'), info('  fs cd / ls / cat      文件操作')]
     terminalStore.lines = this.lines
 
     this.sessions = terminalStore.sessions
@@ -82,7 +72,6 @@ struct TerminalPage {
       timestamp: Date.now(),
     }
 
-    // Handle built-in clear before parse/dispatch
     if (cmd === 'clear') {
       terminalStore.appendInput(cmd)
       terminalStore.clearLines()
@@ -91,7 +80,6 @@ struct TerminalPage {
       return
     }
 
-    // Handle built-in history
     if (cmd === 'history') {
       terminalStore.appendInput(cmd)
       terminalStore.appendLines([
@@ -117,7 +105,12 @@ struct TerminalPage {
 
   build() {
     Column() {
-      StatusBar()
+      StatusBar({
+        onPluginClick: () => {
+          router.pushUrl({ url: 'pages/PluginManagerPage' })
+        }
+      })
+
       TabBar({
         sessions: this.sessions,
         activeSession: this.activeSession,
@@ -135,22 +128,8 @@ struct TerminalPage {
         },
       })
 
-      Row() {
-        Blank()
-        Button('插件')
-          .fontSize(11)
-          .fontColor(COLORS.INFO)
-          .backgroundColor('#1A1A1A')
-          .borderRadius(4)
-          .padding({ left: 10, right: 10, top: 3, bottom: 3 })
-          .margin({ right: 12 })
-          .onClick(() => {
-            router.pushUrl({ url: 'pages/PluginManagerPage' })
-          })
-      }
-      .width('100%')
-
       TerminalView({ lines: this.lines })
+
       CommandInput({
         inputHistory: this.inputHistory,
         onSubmit: (cmd: string) => { this.onSubmit(cmd) },

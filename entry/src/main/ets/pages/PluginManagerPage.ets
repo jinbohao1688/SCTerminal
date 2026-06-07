@@ -76,17 +76,17 @@ struct PluginManagerPage {
 
   build() {
     Column() {
-      // Header with back button
+      // Header
       Row() {
         Button('← 返回')
-          .fontSize(13)
-          .fontColor(COLORS.INFO)
+          .fontSize(14)
+          .fontColor('#4EC9B0')
           .backgroundColor(Color.Transparent)
           .onClick(() => { router.back() })
         Blank()
         Text('插件管理')
-          .fontSize(15)
-          .fontColor(COLORS.INFO)
+          .fontSize(14)
+          .fontColor('#888888')
           .fontFamily('monospace')
         Blank()
         Row().width(60)
@@ -124,7 +124,7 @@ struct PluginManagerPage {
               .fontSize(13)
               .fontColor(COLORS.CMD)
               .fontFamily('monospace')
-            Text('在终端输入 plugin install <id> 安装')
+            Text('在终端输入 plugin install 安装')
               .fontSize(12)
               .fontColor(COLORS.CMD)
               .fontFamily('monospace')
@@ -140,43 +140,41 @@ struct PluginManagerPage {
                 Column() {
                   Row() {
                     Text(card.name)
-                      .fontSize(15)
-                      .fontColor(COLORS.INFO)
+                      .fontSize(14)
+                      .fontColor('#CCCCCC')
                       .fontFamily('monospace')
                     Blank()
                     Text('v' + card.version)
-                      .fontSize(11)
-                      .fontColor(COLORS.CMD)
+                      .fontSize(12)
+                      .fontColor('#444444')
                       .fontFamily('monospace')
                   }
                   .width('100%')
 
                   Text(card.author)
                     .fontSize(11)
-                    .fontColor(COLORS.CMD)
+                    .fontColor('#555555')
                     .fontFamily('monospace')
 
                   Text(card.description)
                     .fontSize(12)
-                    .fontColor(COLORS.INFO)
+                    .fontColor('#777777')
                     .fontFamily('monospace')
                     .margin({ top: 4 })
 
-                  // Commands
                   ForEach(card.commands, (cmd: string) => {
-                    Text(cmd)
-                      .fontSize(11)
-                      .fontColor(COLORS.SUCCESS)
+                    Text('  $ ' + cmd)
+                      .fontSize(12)
+                      .fontColor('#4EC9B0')
                       .fontFamily('monospace')
                       .margin({ top: 2 })
-                  }, (cmd: string) => cmd)
+                  }, (cmd: string) => 'cmd_' + card.id + '_' + cmd)
 
                   Row() {
                     Blank()
-                    Button('卸载')
-                      .fontSize(11)
-                      .fontColor(COLORS.ERROR)
-                      .backgroundColor(Color.Transparent)
+                    Text('卸载')
+                      .fontSize(12)
+                      .fontColor('#F44747')
                       .onClick(async () => {
                         try {
                           await pluginRegistry.uninstall(card.id)
@@ -212,13 +210,13 @@ struct PluginManagerPage {
               Column() {
                 Row() {
                   Text(mp.name)
-                    .fontSize(15)
-                    .fontColor(COLORS.INFO)
+                    .fontSize(14)
+                    .fontColor('#CCCCCC')
                     .fontFamily('monospace')
                   Blank()
                   Text('v' + mp.version)
-                    .fontSize(11)
-                    .fontColor(COLORS.CMD)
+                    .fontSize(12)
+                    .fontColor('#444444')
                     .fontFamily('monospace')
                     .margin({ right: 8 })
                   Text(mp.downloads + ' 次下载')
@@ -230,12 +228,12 @@ struct PluginManagerPage {
 
                 Text(mp.author)
                   .fontSize(11)
-                  .fontColor(COLORS.CMD)
+                  .fontColor('#555555')
                   .fontFamily('monospace')
 
                 Text(mp.description)
                   .fontSize(12)
-                  .fontColor(COLORS.INFO)
+                  .fontColor('#777777')
                   .fontFamily('monospace')
                   .margin({ top: 4 })
 
