@@ -8,6 +8,7 @@ import { handleBattery, COMMANDS as BATTERY_COMMANDS } from '../capabilities/bat
 import { handleNetwork, COMMANDS as NET_COMMANDS } from '../capabilities/networkCapability'
 import { handleSensor, COMMANDS as SENSOR_COMMANDS } from '../capabilities/sensorCapability'
 import { handleFile, COMMANDS as FILE_COMMANDS } from '../capabilities/fileCapability'
+import { handleFs, COMMANDS as FS_COMMANDS } from '../capabilities/FsCapability'
 import { handleHmos, COMMANDS as HMOS_COMMANDS } from '../capabilities/HmosCapability'
 import { handleSsh, COMMANDS as SSH_COMMANDS } from '../remote/SshCapability'
 import { handleHttp, COMMANDS as HTTP_COMMANDS } from '../remote/HttpCapability'
@@ -18,6 +19,7 @@ handlers.set('battery', handleBattery)
 handlers.set('net',     handleNetwork)
 handlers.set('sensor',  handleSensor)
 handlers.set('file',    handleFile)
+handlers.set('fs',      handleFs)
 handlers.set('hmos',    handleHmos)
 handlers.set('ssh',     handleSsh)
 handlers.set('http',    handleHttp)
@@ -114,6 +116,10 @@ function buildHelp(): OutputLine[] {
   for (let i = 0; i < HTTP_COMMANDS.length; i++) {
     lines.push(ok('  http ' + HTTP_COMMANDS[i].action))
     lines.push(info('    → ' + HTTP_COMMANDS[i].description))
+  }
+  for (let i = 0; i < FS_COMMANDS.length; i++) {
+    lines.push(ok('  ' + FS_COMMANDS[i].action))
+    lines.push(info('    → ' + FS_COMMANDS[i].description))
   }
   for (let i = 0; i < HMOS_COMMANDS.length; i++) {
     lines.push(ok('  ' + HMOS_COMMANDS[i].usage))
