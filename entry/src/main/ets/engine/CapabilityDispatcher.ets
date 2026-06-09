@@ -12,6 +12,7 @@ import { handleFs, COMMANDS as FS_COMMANDS } from '../capabilities/FsCapability'
 import { handleHmos, COMMANDS as HMOS_COMMANDS } from '../capabilities/HmosCapability'
 import { handleSsh, COMMANDS as SSH_COMMANDS } from '../remote/SshCapability'
 import { handleHttp, COMMANDS as HTTP_COMMANDS } from '../remote/HttpCapability'
+import { handleRun, COMMANDS as RUN_COMMANDS } from '../capabilities/RunCapability'
 
 const handlers = new Map<string, CapabilityHandler>()
 handlers.set('device',  handleDevice)
@@ -23,6 +24,7 @@ handlers.set('fs',      handleFs)
 handlers.set('hmos',    handleHmos)
 handlers.set('ssh',     handleSsh)
 handlers.set('http',    handleHttp)
+handlers.set('run',     handleRun)
 
 async function handlePlugin(action: string, args: string[], flags: Map<string, string>): Promise<OutputLine[]> {
   if (action === 'install') {
@@ -128,6 +130,10 @@ function buildHelp(): OutputLine[] {
   for (let i = 0; i < HMOS_COMMANDS.length; i++) {
     lines.push(ok('  ' + HMOS_COMMANDS[i].usage))
     lines.push(info('    → ' + HMOS_COMMANDS[i].description))
+  }
+  for (let i = 0; i < RUN_COMMANDS.length; i++) {
+    lines.push(ok('  ' + RUN_COMMANDS[i].usage))
+    lines.push(info('    → ' + RUN_COMMANDS[i].description))
   }
 
   return lines

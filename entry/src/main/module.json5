@@ -2,6 +2,12 @@
   "module": {
     "name": "entry",
     "type": "entry",
+    "hnpPackages": [
+      {
+        "package": "sct-tools",
+        "type": "private"
+      }
+    ],
     "description": "$string:module_desc",
     "mainElement": "EntryAbility",
     "deviceTypes": [

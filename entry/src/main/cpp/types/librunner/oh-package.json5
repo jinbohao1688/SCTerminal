@@ -1,0 +1,5 @@
+{
+  "name": "librunner.so",
+  "types": "./index.d.ets",
+  "description": "SCTerminal process runner"
+}

@@ -1,0 +1,5 @@
+#!/data/app/base.org/base_1.0/bin/python3.13
+
+import pydoc
+if __name__ == '__main__':
+    pydoc.cli()
