@@ -8,3 +8,10 @@ oh_modules/
 CLAUDE.md
 HANDOVER.md
 PROMPTS.md
+tmp_hnp*/
+sct-tools/
+sct-tools_src/
+*.py
+*.sh
+.zip
+.claude/
